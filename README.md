@@ -58,6 +58,12 @@ Failed calls still appear in the CSV as `Text = "FAILED: <error>"` with all moti
 
 ---
 
+## Claude Desktop (MCP)
+
+A local MCP server (`mcp_server.py`) exposes `list_motives`, `estimate_cost`, and `generate` as tools for Claude Desktop. No separate daemon — Claude Desktop spawns the server on demand and tears it down when you quit. Setup and tool reference: [`docs/mcp.md`](docs/mcp.md).
+
+---
+
 ## Commands at a glance
 
 | Command | Purpose |
@@ -79,6 +85,7 @@ Run `python cli.py <command> --help` for flags.
 | Page | For |
 |---|---|
 | [`docs/usage.md`](docs/usage.md) | Full walkthroughs of both usage paths; every subcommand in detail. |
+| [`docs/mcp.md`](docs/mcp.md) | Claude Desktop integration via the MCP server. |
 | [`docs/config-reference.md`](docs/config-reference.md) | Exhaustive YAML schema. |
 | [`docs/motives.md`](docs/motives.md) | The 20-motive catalog + strength scale. |
 | [`docs/output.md`](docs/output.md) | JSONL and CSV schemas (the contract with the ML pipeline). |

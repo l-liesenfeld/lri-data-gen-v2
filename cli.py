@@ -12,18 +12,14 @@ Run `python cli.py <command> --help` for per-command help.
 """
 from __future__ import annotations
 
-import asyncio
-import json
 import os
-import shutil
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 import click
 from dotenv import load_dotenv
 
-from src import pipeline, report
+from src import report, runner
 from src.cost import estimate
 from src.llm.interface import UnknownProviderError
 from src.llm.registry import build_provider
@@ -36,6 +32,7 @@ from src.models import (
     load_config,
 )
 from src.prompt_builder import build_prompt
+from src.runner import ContextWindowExceeded
 
 ROOT = Path(__file__).resolve().parent
 DEFAULT_MATRIX = ROOT / "data" / "motive_matrix.json"
@@ -74,26 +71,6 @@ def _require_api_key(provider: str) -> str:
     return key
 
 
-def _slug(s: str) -> str:
-    return "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in s)
-
-
-def _utc_iso() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
-
-
-def _make_output_dir(cfg: ExperimentConfig) -> Path:
-    ts = datetime.now().strftime("%Y-%m-%d_%H%M")
-    base = cfg.output_dir / f"{_slug(cfg.experiment_name)}_{ts}"
-    candidate = base
-    n = 2
-    while candidate.exists():
-        candidate = Path(f"{base}-{n}")
-        n += 1
-    candidate.mkdir(parents=True, exist_ok=True)
-    return candidate
-
-
 def print_estimate(est: CostEstimate) -> None:
     click.echo("Cost estimate")
     click.echo(f"  Model:             {est.model}")
@@ -111,8 +88,6 @@ def print_estimate(est: CostEstimate) -> None:
 
 
 def _confirm_cost(est: CostEstimate, auto_yes: bool) -> None:
-    if not est.fits_context:
-        raise click.ClickException("aborting: context window exceeded")
     if est.cost_usd > 20 or est.n_calls > 500:
         click.secho(
             f"  Heads up: large run (${est.cost_usd:.2f}, {est.n_calls} calls)", fg="yellow"
@@ -121,40 +96,6 @@ def _confirm_cost(est: CostEstimate, auto_yes: bool) -> None:
         return
     if not click.confirm("Proceed?", default=False):
         raise click.ClickException("aborted by user")
-
-
-def _write_run_meta(
-    path: Path,
-    cfg: ExperimentConfig,
-    summary: RunSummary,
-    est: CostEstimate,
-    started_at: str,
-    finished_at: str,
-) -> None:
-    path.write_text(
-        json.dumps(
-            {
-                "experiment_name": cfg.experiment_name,
-                "notes": cfg.notes,
-                "started_at": started_at,
-                "finished_at": finished_at,
-                "model": cfg.model,
-                "language": cfg.language,
-                "n_responses_requested": summary.n_requested,
-                "n_completed": summary.n_completed,
-                "n_failed": summary.n_failed,
-                "tokens_in_total": summary.tokens_in_total,
-                "tokens_out_total": summary.tokens_out_total,
-                "cost_usd_total": round(summary.cost_usd_total, 6),
-                "cost_estimate_usd": round(est.cost_usd, 6),
-                "elapsed_seconds": round(summary.elapsed_seconds, 2),
-                "concurrency": cfg.concurrency,
-                "synth_version": VERSION,
-            },
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
 
 
 # ---------------------------------------------------------------------------
@@ -182,16 +123,11 @@ def run_generate(
 
     api_key = _require_api_key(cfg.provider_prefix)
     try:
-        provider = build_provider(
-            cfg.model, api_key,
-            timeout_seconds=cfg.timeout_seconds,
-            max_retries=cfg.max_retries,
-        )
-    except UnknownProviderError as exc:
+        prepared = runner.prepare(cfg, matrix, api_key)
+    except ContextWindowExceeded as exc:
+        raise click.ClickException(f"aborting: {exc}") from exc
+    except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
-
-    request = build_prompt(cfg, matrix)
-    est = estimate(cfg, request, provider)
 
     click.echo(f"synth-data v{VERSION}")
     click.echo(f"Config:  {config_path}")
@@ -201,39 +137,18 @@ def run_generate(
         tpm = f"{cfg.tokens_per_minute:,} TPM" if cfg.tokens_per_minute else "—"
         click.echo(f"Rate limit: {rpm}   {tpm}")
     click.echo("")
-    print_estimate(est)
+    print_estimate(prepared.estimate)
     click.echo("")
-    _confirm_cost(est, auto_yes)
+    _confirm_cost(prepared.estimate, auto_yes)
 
-    run_dir = _make_output_dir(cfg)
-    shutil.copyfile(config_path, run_dir / "config_snapshot.yaml")
-    started_at = _utc_iso()
-
-    summary = asyncio.run(
-        pipeline.run(
-            cfg, matrix, provider, request,
-            output_dir=run_dir,
-            resume_path=resume_path,
-            show_progress=show_progress,
-        )
+    summary, run_dir, _started, _finished = runner.execute(
+        prepared, matrix,
+        resume_path=resume_path,
+        show_progress=show_progress,
+        config_snapshot_path=config_path,
+        write_csv=not no_csv,
+        version=VERSION,
     )
-    finished_at = _utc_iso()
-
-    _write_run_meta(run_dir / "run_meta.json", cfg, summary, est, started_at, finished_at)
-
-    if not no_csv:
-        results = report.load_jsonl(summary.results_jsonl)
-        token_total = summary.tokens_in_total + summary.tokens_out_total
-        csv_path = run_dir / "results.csv"
-        report.write_csv(
-            results,
-            csv_path,
-            model=cfg.model,
-            timestamp=started_at,
-            token_usage=token_total,
-            request_id=run_dir.name,
-        )
-        summary.results_csv = csv_path
 
     click.echo("")
     click.secho(f"Done in {summary.elapsed_seconds:.1f}s", bold=True)
@@ -244,7 +159,7 @@ def run_generate(
         ) + ")"
     click.echo(f"  Completed: {summary.n_completed}    Failed: {summary.n_failed}{fail_suffix}")
     click.echo(f"  Tokens in: {summary.tokens_in_total:,}  out: {summary.tokens_out_total:,}")
-    click.echo(f"  Actual cost: ${summary.cost_usd_total:.2f}  (est ${est.cost_usd:.2f})")
+    click.echo(f"  Actual cost: ${summary.cost_usd_total:.2f}  (est ${prepared.estimate.cost_usd:.2f})")
     click.echo(f"  Output:    {run_dir}/")
     if summary.failure_breakdown.get("rate_limited") and not (
         cfg.requests_per_minute or cfg.tokens_per_minute
