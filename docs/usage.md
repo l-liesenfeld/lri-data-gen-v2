@@ -13,7 +13,7 @@ python cli.py
 The wizard walks you through:
 
 1. **Experiment name** — a label for this run (default: timestamped).
-2. **Model** — phase 1 only has GPT-4o.
+2. **Model** — pick an OpenAI or Anthropic model from the list (pricing shown inline).
 3. **Language** — English, Deutsch, or bilingual.
 4. **Number of responses** — how many journal entries to generate.
 5. **Response length** — 1 to 5 sentences per entry.
@@ -117,10 +117,11 @@ Completed response IDs are skipped; everything else is re-attempted.
 
 ## Environment
 
-The only required env var is your OpenAI key. Put it in `.env`:
+Set the API key(s) for whichever provider(s) you plan to use. Put them in `.env`:
 
 ```
 OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-`python-dotenv` picks this up automatically.
+`python-dotenv` picks these up automatically. Only the key for the provider in your config's `model:` prefix is required.

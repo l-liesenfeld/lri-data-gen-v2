@@ -18,9 +18,22 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CONFIG_DIR = ROOT / "config"
 DEFAULT_MATRIX = ROOT / "data" / "motive_matrix.json"
 
-# Phase 1 model list. Add entries here as providers come online.
+# Model list shown in the wizard. Keep sorted cheapest → most capable within each
+# provider. Pricing/context live in the adapters; this is just labels.
 MODEL_CHOICES: list[tuple[str, str]] = [
-    ("openai:gpt-4o-2024-08-06", "OpenAI GPT-4o"),
+    ("openai:gpt-5.4-mini",       "OpenAI GPT-5.4 mini       — $0.75/$4.50 per MTok, 272K ctx (recommended)"),
+    ("openai:gpt-5.4",            "OpenAI GPT-5.4            — $2.50/$15.00 per MTok, 272K ctx"),
+    ("openai:gpt-5.4-nano",       "OpenAI GPT-5.4 nano       — $0.20/$1.25 per MTok, 272K ctx"),
+    ("openai:gpt-5.4-pro",        "OpenAI GPT-5.4 pro        — $30/$180 per MTok, 272K ctx"),
+    ("openai:gpt-4.1-mini",       "OpenAI GPT-4.1 mini       — $0.40/$1.60 per MTok, 1M ctx"),
+    ("openai:gpt-4.1",            "OpenAI GPT-4.1            — $2.00/$8.00 per MTok, 1M ctx"),
+    ("openai:gpt-4.1-nano",       "OpenAI GPT-4.1 nano       — $0.10/$0.40 per MTok, 1M ctx"),
+    ("openai:gpt-4o-mini",        "OpenAI GPT-4o mini        — $0.15/$0.60 per MTok, 128K ctx"),
+    ("openai:gpt-4o",             "OpenAI GPT-4o             — $2.50/$10.00 per MTok, 128K ctx"),
+    ("anthropic:claude-haiku-4-5",  "Anthropic Claude Haiku 4.5  — $1.00/$5.00 per MTok, 200K ctx"),
+    ("anthropic:claude-sonnet-4-6", "Anthropic Claude Sonnet 4.6 — $3.00/$15.00 per MTok, 1M ctx"),
+    ("anthropic:claude-opus-4-6",   "Anthropic Claude Opus 4.6   — $5.00/$25.00 per MTok, 1M ctx"),
+    ("anthropic:claude-opus-4-7",   "Anthropic Claude Opus 4.7   — $5.00/$25.00 per MTok, 1M ctx (latest)"),
 ]
 
 LANGUAGE_CHOICES: list[tuple[str, str]] = [

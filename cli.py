@@ -61,12 +61,15 @@ def _load_cfg(config_path: Path, matrix: MotiveMatrix) -> ExperimentConfig:
         raise click.ClickException(f"config error: {exc}") from exc
 
 
-def _require_openai_key() -> str:
-    key = os.environ.get("OPENAI_API_KEY")
+def _require_api_key(provider: str) -> str:
+    env_var = {"openai": "OPENAI_API_KEY", "anthropic": "ANTHROPIC_API_KEY"}.get(provider)
+    if env_var is None:
+        raise click.ClickException(f"unknown provider prefix: {provider!r}")
+    key = os.environ.get(env_var)
     if not key:
         raise click.ClickException(
-            "OPENAI_API_KEY not set. Add it to .env or export it:\n"
-            '  echo "OPENAI_API_KEY=sk-..." >> .env'
+            f"{env_var} not set. Add it to .env or export it:\n"
+            f'  echo "{env_var}=..." >> .env'
         )
     return key
 
@@ -177,7 +180,7 @@ def run_generate(
     if out_dir is not None:
         cfg.output_dir = out_dir
 
-    api_key = _require_openai_key()
+    api_key = _require_api_key(cfg.provider_prefix)
     try:
         provider = build_provider(
             cfg.model, api_key,
@@ -369,7 +372,7 @@ def cmd_estimate(ctx: click.Context, config_path: Path) -> None:
     but does load tiktoken encodings. Use before `generate` to budget a run."""
     matrix = _load_matrix(ctx.obj["matrix_path"])
     cfg = _load_cfg(config_path, matrix)
-    api_key = _require_openai_key()
+    api_key = _require_api_key(cfg.provider_prefix)
     try:
         provider = build_provider(
             cfg.model, api_key,

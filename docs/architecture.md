@@ -16,7 +16,8 @@ src/
   llm/
     interface.py         # LLMProvider protocol + error types
     openai.py            # OpenAI adapter (httpx + tiktoken + retry + pricing)
-    registry.py          # "openai:..." -> provider instance
+    anthropic.py         # Anthropic Messages adapter (httpx + json_schema + retry + pricing)
+    registry.py          # "openai:..." / "anthropic:..." -> provider instance
 prompts/
   legacy.txt             # the prompt template with {placeholders}
 data/
@@ -81,21 +82,22 @@ motive_matrix.json ──► load ─► MotiveMatrix ─┐
 
 ## Retry policy
 
-Lives entirely in `src/llm/openai.py:OpenAIProvider.complete`:
+Lives inside each provider adapter's `.complete()`:
 
-- Retryable HTTP status: 408, 409, 425, 429, 500, 502, 503, 504.
+- Retryable HTTP status: 408, 409, 425, 429, 500, 502, 503, 504 (Anthropic also includes 529 — overloaded).
 - Retryable exceptions: `TimeoutException`, `NetworkError`.
-- Backoff: `min(2**attempt, 16) * jitter(±20%)`, up to `max_retries` (default 5).
-- `Retry-After` header is honored when present (429).
-- Non-retryable (401, 403, 400) raises immediately and kills the run.
+- Backoff: `min(2**attempt, 60) * jitter(±20%)`, up to `max_retries` (default 8).
+- `Retry-After` header is honored when present.
+- Non-retryable (400, 401, 403) raises immediately and kills the run.
 
-## Extending to new providers (phase 2 preview)
+## Extending to new providers
 
 1. Add `src/llm/<provider>.py` implementing the `LLMProvider` protocol.
-2. Include a pricing dict and a tokenizer.
-3. Wire it in `src/llm/registry.py:build_provider`.
+2. Include a pricing dict and a tokenizer (heuristic or real).
+3. Wire it in `src/llm/registry.py:build_provider` and allow the prefix in `src/models.py:load_config`.
+4. Add the API-key env var mapping in `cli.py:_require_api_key`.
 
-That's it. Nothing else changes.
+Nothing else changes.
 
 ## Extending to new models (same provider)
 

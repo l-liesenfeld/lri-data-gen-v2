@@ -117,7 +117,12 @@ def load_config(path: Path, matrix: MotiveMatrix) -> ExperimentConfig:
     if not model or not isinstance(model, str):
         raise ConfigError("missing required field: model")
     if ":" not in model:
-        raise ConfigError(f"model must be prefixed (e.g. 'openai:gpt-4o-...'), got {model!r}")
+        raise ConfigError(f"model must be prefixed (e.g. 'openai:gpt-5.4-mini'), got {model!r}")
+    _provider = model.split(":", 1)[0]
+    if _provider not in ("openai", "anthropic"):
+        raise ConfigError(
+            f"unsupported provider {_provider!r}. Supported: 'openai', 'anthropic'."
+        )
 
     name = exp.get("name") or "run"
     output_dir = Path(exp.get("output_dir") or "data/output")
@@ -267,6 +272,9 @@ class LLMRequest:
     max_tokens: int = 512
     temperature: float = 0.9
     response_format_json: bool = True
+    # Provider-agnostic JSON schema for structured output. If set, Anthropic uses
+    # output_config.format.json_schema to enforce it. OpenAI still uses json_object mode.
+    json_schema: dict | None = None
 
 
 @dataclass

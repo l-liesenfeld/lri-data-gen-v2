@@ -4,7 +4,9 @@
 
 Two numbers, per call:
 
-- **Input tokens (exact):** the system + user message are encoded with the model's tiktoken encoding, plus OpenAI's chat-completions overhead (3 tokens per message + 3 priming). This is real, not heuristic.
+- **Input tokens:**
+  - *OpenAI:* exact — system + user encoded with the model's tiktoken encoding, plus chat-completions overhead (3 tokens per message + 3 priming).
+  - *Anthropic:* heuristic — `(len(system) + len(user)) // 4`. Anthropic's official token counter needs a network call, which isn't worth it for pre-flight estimates. The **actual** run cost is still exact because it uses `usage.input_tokens` from each response.
 - **Output tokens (estimate):** a formula in `src/cost.py:_estimate_output_tokens`:
 
   ```
@@ -18,13 +20,32 @@ Multiply by `n_responses` → totals. Multiply by the model's per-token pricing 
 
 ## Pricing table
 
-Phase 1 ships with one entry (see `src/llm/openai.py:OPENAI_PRICING`):
+**OpenAI** (`src/llm/openai.py:OPENAI_PRICING`):
 
 | Model | Input $/1M | Output $/1M | Context |
 |---|---|---|---|
+| `gpt-5.4` | $2.50 | $15.00 | 272,000 |
+| `gpt-5.4-mini` | $0.75 | $4.50 | 272,000 |
+| `gpt-5.4-nano` | $0.20 | $1.25 | 272,000 |
+| `gpt-5.4-pro` | $30.00 | $180.00 | 272,000 |
+| `gpt-5.2` | $1.75 | $14.00 | 272,000 |
+| `gpt-4.1` | $2.00 | $8.00 | 1,000,000 |
+| `gpt-4.1-mini` | $0.40 | $1.60 | 1,000,000 |
+| `gpt-4.1-nano` | $0.10 | $0.40 | 1,000,000 |
+| `gpt-4o` | $2.50 | $10.00 | 128,000 |
+| `gpt-4o-mini` | $0.15 | $0.60 | 128,000 |
 | `gpt-4o-2024-08-06` | $2.50 | $10.00 | 128,000 |
 
-Adding a model is one line in that dict (plus whatever the provider adapter needs to actually call it).
+**Anthropic** (`src/llm/anthropic.py:ANTHROPIC_PRICING`):
+
+| Model | Input $/1M | Output $/1M | Context |
+|---|---|---|---|
+| `claude-opus-4-7` | $5.00 | $25.00 | 1,000,000 |
+| `claude-opus-4-6` | $5.00 | $25.00 | 1,000,000 |
+| `claude-sonnet-4-6` | $3.00 | $15.00 | 1,000,000 |
+| `claude-haiku-4-5` | $1.00 | $5.00 | 200,000 |
+
+Adding a model is one line in the relevant provider's pricing dict. Confirm numbers against the provider's pricing page before a large run.
 
 ## Pre-run gate
 

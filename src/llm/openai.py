@@ -1,4 +1,4 @@
-"""OpenAI chat completions adapter. Phase 1: gpt-4o only."""
+"""OpenAI chat completions adapter."""
 from __future__ import annotations
 
 import asyncio
@@ -14,10 +14,23 @@ from .interface import ProviderError
 
 log = logging.getLogger(__name__)
 
-# USD per 1M tokens. Phase 1 ships with the single confirmed 4o entry.
-# Additional models + providers are phase 2.
+# Pricing in USD per 1M tokens. "ctx" is the model's context window.
+# Keep in sync with platform.openai.com/docs/pricing.
 OPENAI_PRICING: dict[str, dict[str, float]] = {
-    "gpt-4o-2024-08-06": {"in": 2.50, "out": 10.00, "ctx": 128_000.0},
+    # GPT-5 family (reasoning-first, 272K context).
+    "gpt-5.4":      {"in": 2.50,  "out": 15.00,  "ctx": 272_000.0},
+    "gpt-5.4-mini": {"in": 0.75,  "out": 4.50,   "ctx": 272_000.0},
+    "gpt-5.4-nano": {"in": 0.20,  "out": 1.25,   "ctx": 272_000.0},
+    "gpt-5.4-pro":  {"in": 30.00, "out": 180.00, "ctx": 272_000.0},
+    "gpt-5.2":      {"in": 1.75,  "out": 14.00,  "ctx": 272_000.0},
+    # GPT-4.1 family (long-context, 1M).
+    "gpt-4.1":      {"in": 2.00,  "out": 8.00,   "ctx": 1_000_000.0},
+    "gpt-4.1-mini": {"in": 0.40,  "out": 1.60,   "ctx": 1_000_000.0},
+    "gpt-4.1-nano": {"in": 0.10,  "out": 0.40,   "ctx": 1_000_000.0},
+    # GPT-4o family (previous gen, 128K).
+    "gpt-4o":              {"in": 2.50, "out": 10.00, "ctx": 128_000.0},
+    "gpt-4o-mini":         {"in": 0.15, "out": 0.60,  "ctx": 128_000.0},
+    "gpt-4o-2024-08-06":   {"in": 2.50, "out": 10.00, "ctx": 128_000.0},
 }
 
 _CHAT_URL = "https://api.openai.com/v1/chat/completions"
@@ -36,7 +49,7 @@ class OpenAIProvider:
         if model_id not in OPENAI_PRICING:
             known = ", ".join(sorted(OPENAI_PRICING))
             raise ProviderError(
-                f"unknown OpenAI model {model_id!r}. Phase 1 supports: {known}"
+                f"unknown OpenAI model {model_id!r}. Known models: {known}"
             )
         self._model_id = model_id
         self._api_key = api_key
@@ -80,8 +93,12 @@ class OpenAIProvider:
                 {"role": "user", "content": request.user},
             ],
             "temperature": request.temperature,
-            "max_tokens": request.max_tokens,
         }
+        # GPT-5 family (reasoning models) renamed the parameter.
+        if self._model_id.startswith("gpt-5"):
+            body["max_completion_tokens"] = request.max_tokens
+        else:
+            body["max_tokens"] = request.max_tokens
         if request.response_format_json:
             body["response_format"] = {"type": "json_object"}
 

@@ -10,7 +10,7 @@ experiment:   # optional metadata
   output_dir: "data/output"
   notes: "..."
 
-model: "openai:gpt-4o-2024-08-06"   # required, provider-prefixed
+model: "openai:gpt-5.4-mini"   # required, provider-prefixed
 
 generation:
   n_responses: 10
@@ -44,13 +44,30 @@ motives:
 
 ### `model` (required)
 
-A provider-prefixed model string. Phase 1 supports:
+A provider-prefixed model string. Supported providers: `openai:`, `anthropic:`.
 
-| Value | Description |
+**OpenAI models:**
+
+| Value | Notes |
 |---|---|
-| `openai:gpt-4o-2024-08-06` | OpenAI GPT-4o (Aug 2024). The only model wired right now. |
+| `openai:gpt-5.4-mini` | Recommended default — best quality-to-cost for this workload. |
+| `openai:gpt-5.4` | Flagship reasoning model. |
+| `openai:gpt-5.4-nano` | Cheapest GPT-5.4 tier. |
+| `openai:gpt-5.4-pro` | Maximum capability (expensive). |
+| `openai:gpt-5.2` | Previous GPT-5 generation. |
+| `openai:gpt-4.1`, `openai:gpt-4.1-mini`, `openai:gpt-4.1-nano` | 1M-context family. |
+| `openai:gpt-4o`, `openai:gpt-4o-mini`, `openai:gpt-4o-2024-08-06` | Previous-gen 128K. |
 
-More providers (Anthropic, Ollama) and models (GPT-5 family) are phase 2.
+**Anthropic models:**
+
+| Value | Notes |
+|---|---|
+| `anthropic:claude-opus-4-7` | Latest flagship (April 2026). |
+| `anthropic:claude-opus-4-6` | Prior flagship, same price. |
+| `anthropic:claude-sonnet-4-6` | Production workhorse. |
+| `anthropic:claude-haiku-4-5` | Speed/volume tier. |
+
+Full pricing and context windows: [`cost.md`](cost.md). Auth: `OPENAI_API_KEY` for `openai:`, `ANTHROPIC_API_KEY` for `anthropic:`.
 
 ### `generation` (required)
 
@@ -144,7 +161,7 @@ experiment:
   name: "bilingual_affiliation_pilot"
   notes: "first bilingual run, low-affiliation probe"
 
-model: "openai:gpt-4o-2024-08-06"
+model: "openai:gpt-5.4-mini"
 
 generation:
   n_responses: 100

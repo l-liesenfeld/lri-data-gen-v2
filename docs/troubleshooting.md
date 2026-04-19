@@ -1,14 +1,15 @@
 # Troubleshooting
 
-## `OPENAI_API_KEY not set`
+## `OPENAI_API_KEY not set` / `ANTHROPIC_API_KEY not set`
 
-Put the key in `.env` at the project root:
+Put the relevant key(s) in `.env` at the project root:
 
 ```
 OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Or export it in your shell. The CLI reads `.env` automatically via `python-dotenv`.
+Or export them in your shell. The CLI reads `.env` automatically via `python-dotenv`. Only the key for the provider in your config's `model:` prefix is required.
 
 ## `unknown motive id 'X9'`
 
@@ -24,11 +25,15 @@ Exactly one of: `english`, `deutsch`, `deutsch-english`. Not `en`, `de`, or `bot
 
 ## `model must be prefixed`
 
-Use `openai:gpt-4o-2024-08-06`, not `gpt-4o-2024-08-06`. Phase 1 only supports the `openai:` prefix.
+Use `openai:gpt-5.4-mini` or `anthropic:claude-sonnet-4-6`, not the bare model name.
 
-## `unknown OpenAI model 'gpt-5-...'`
+## `unsupported provider 'X'`
 
-Phase 1 only has `gpt-4o-2024-08-06` in the pricing table. Other models are phase 2. If you need another model urgently, add an entry to `OPENAI_PRICING` in `src/llm/openai.py`.
+Only `openai:` and `anthropic:` are supported. Check for typos in the prefix.
+
+## `unknown OpenAI/Anthropic model 'X'`
+
+The model isn't in the pricing table. Add an entry to `OPENAI_PRICING` (`src/llm/openai.py`) or `ANTHROPIC_PRICING` (`src/llm/anthropic.py`) — one line with input/output $/MTok and context window. Confirm numbers against the provider's current pricing page.
 
 ## Hanging on no-input
 
@@ -99,3 +104,13 @@ You ran `report` against an empty or corrupted file. Check that the run actually
 ## The estimate is way off from actual cost
 
 Input tokens are exact (tiktoken). Output tokens are a heuristic; the formula in `src/cost.py:_estimate_output_tokens` may need calibration — see [`cost.md`](cost.md).
+
+## Outputs cluster into a few similar variants
+
+Expected with the current prompt: every call sends a byte-identical system + user message, so the only source of variation is sampling. Temperature helps, but different models have different intrinsic variance — **Claude models especially tend to mode-collapse** on repeated identical prompts (openings like "Had coffee with Sarah…" across all 10 calls). GPT-4o at the same temperature sampled more widely on our test runs; this isn't a bug, it's a model trait.
+
+This is not a blocker for training data as long as the *motive signal* is preserved, but if you need more surface diversity:
+
+- **Raise temperature** toward 1.0.
+- **Add a `context_hint`** that rotates (requires re-running with different configs).
+- **Planned fix:** per-call variation seed + random scene rotation injected into the prompt, so no two calls share a byte-identical prompt. Tracked for a follow-up version. The proper fix (per-call synthetic persona/scenario generators — what the legacy Tauri tool did) is a bigger task deferred with the rest of phase 2.

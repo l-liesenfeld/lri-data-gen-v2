@@ -87,6 +87,46 @@ def _format_context_block(context_hint: str) -> str:
     return "\n".join(parts)
 
 
+def _build_response_schema(bilingual: bool) -> dict:
+    entry_props: dict = {
+        "response_id": {"type": "integer"},
+        "text": {"type": "string"},
+        "motives_present": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "string"},
+                    "name": {"type": "string"},
+                    "strength": {"type": "number"},
+                },
+                "required": ["id", "name", "strength"],
+                "additionalProperties": False,
+            },
+        },
+    }
+    required = ["response_id", "text", "motives_present"]
+    if bilingual:
+        entry_props["text_deutsch"] = {"type": "string"}
+        required.append("text_deutsch")
+    return {
+        "type": "object",
+        "properties": {
+            "responses": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": entry_props,
+                    "required": required,
+                    "additionalProperties": False,
+                },
+            }
+        },
+        "required": ["responses"],
+        "additionalProperties": False,
+    }
+
+
 def build_prompt(
     cfg: ExperimentConfig,
     matrix: MotiveMatrix,
@@ -95,6 +135,10 @@ def build_prompt(
 ) -> LLMRequest:
     template = _load_template(str(template_path))
     frag = LANGUAGE_FRAGMENTS[cfg.language]
+    # TODO: sentence-count alone isn't a tight enough length constraint — reasoning-tuned
+    # models (GPT-5.4, Claude Opus) comply with the count but stack 70-word clause chains
+    # with em-dashes/semicolons. Add a word-count guardrail (target ~response_length*20 words)
+    # and a "short journal-like sentences, not literary" nudge in prompts/legacy.txt.
     filled = template.format(
         motives_block=_format_motives_block(cfg.motives, matrix),
         language_instructions=frag["prompt_instructions"],
@@ -112,4 +156,5 @@ def build_prompt(
         max_tokens=cfg.max_tokens,
         temperature=cfg.temperature,
         response_format_json=True,
+        json_schema=_build_response_schema(bool(frag["bilingual"])),
     )

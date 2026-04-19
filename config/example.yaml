@@ -6,8 +6,12 @@ experiment:
   # output_dir: "data/output"      # optional; default data/output
   # notes: "first run with 4o"     # optional; copied into run_meta.json
 
-# Phase 1: openai: prefix only. More providers coming later.
-model: "openai:gpt-4o-2024-08-06"
+# Supported prefixes: 'openai:' and 'anthropic:'. Run `python cli.py wizard`
+# to see the full model list with pricing. Recommended default:
+model: "openai:gpt-5.4"
+# Alternatives:
+#   openai:gpt-4.1-mini            cheaper, 1M ctx
+#   anthropic:claude-sonnet-4-6    alternate provider for comparison
 
 generation:
   n_responses: 10 # total calls (one entry per call)

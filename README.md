@@ -2,7 +2,7 @@
 
 A Python CLI for generating synthetic psychological training data. Journal-style text responses with configurable subconscious motives at configurable strengths. Used to produce labeled training data for a detection model.
 
-Phase 1 supports **OpenAI `gpt-4o-2024-08-06` only**. More models + providers are coming.
+Supports **OpenAI** (GPT-5.4, GPT-4.1, GPT-4o families) and **Anthropic** (Claude Opus/Sonnet/Haiku 4.x). Pick per run via the `model:` prefix — e.g. `openai:gpt-5.4-mini` or `anthropic:claude-sonnet-4-6`.
 
 ---
 
@@ -15,7 +15,7 @@ cd synth-data
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env      # then paste your OPENAI_API_KEY into .env
+cp .env.example .env      # then paste your OPENAI_API_KEY and/or ANTHROPIC_API_KEY
 ```
 
 ---
@@ -101,7 +101,7 @@ python cli.py generate config/my_run.yaml --resume data/output/<prior_run>/resul
 
 ## Roadmap
 
-- **Phase 2:** additional OpenAI models (GPT-5 family), Anthropic, local Ollama. Persona mode with cached profiles.
-- **Phase 3:** motive-strength ranges + sampling, experiment orchestration.
+- **Next:** Batch APIs (50% off for OpenAI + Anthropic) for large bulk runs. Local Ollama provider.
+- **Later:** persona mode with cached profiles, motive-strength ranges + sampling, experiment orchestration.
 
 See [`CHANGELOG.md`](CHANGELOG.md).
