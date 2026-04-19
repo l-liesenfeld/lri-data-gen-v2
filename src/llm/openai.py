@@ -159,6 +159,7 @@ class OpenAIProvider:
 
     @staticmethod
     def _backoff_delay(attempt: int) -> float:
-        base = min(2**attempt, 16.0)
+        # Rate-limit windows on tight OpenAI tiers can be 20–60s; cap high.
+        base = min(2**attempt, 60.0)
         jitter = 1.0 + random.uniform(-0.2, 0.2)
         return base * jitter

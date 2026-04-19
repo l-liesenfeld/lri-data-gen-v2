@@ -1,101 +1,107 @@
-# synth-data (phase 1)
+# synth-data
 
-Synthetic psychological training data generator. Phase 1 is a Python CLI that replaces
-the Tauri desktop tool with functional parity, changing one thing: each response is its
-own API call instead of one bulk call returning N responses.
+A Python CLI for generating synthetic psychological training data. Journal-style text responses with configurable subconscious motives at configurable strengths. Used to produce labeled training data for a detection model.
 
-Phase 1 supports **OpenAI `gpt-4o-2024-08-06` only**. More models + providers next.
+Phase 1 supports **OpenAI `gpt-4o-2024-08-06` only**. More models + providers are coming.
+
+---
 
 ## Install
+
+Requires Python 3.11+.
 
 ```bash
 cd synth-data
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env     # then paste your OPENAI_API_KEY into .env
+cp .env.example .env      # then paste your OPENAI_API_KEY into .env
 ```
 
-Requires Python 3.11+.
+---
 
-## First run
+## Two ways to use it
+
+### 1. Interactive wizard (easiest)
 
 ```bash
-# Show available motives
-python cli.py list-motives
-
-# Check your config file
-python cli.py validate config/example.yaml
-
-# Print a cost estimate (no network call)
-python cli.py estimate config/example.yaml
-
-# Actually run it
-python cli.py generate config/example.yaml
+python cli.py
 ```
 
-You'll see a cost estimate and a `Proceed? [y/N]` prompt before any money is spent.
-Pass `-y` to skip the prompt.
+Answers a handful of questions (name, model, language, number of responses, length, motives, strengths) and writes a YAML to `config/`. At the end you can save and run, or save only.
 
-## Output
+### 2. Config file
+
+```bash
+cp config/example.yaml config/my_run.yaml
+# edit config/my_run.yaml
+python cli.py generate config/my_run.yaml
+```
+
+Either way, the tool shows a cost estimate and asks `Proceed? [y/N]` before spending a cent.
+
+---
+
+## What you get
 
 Each run writes a timestamped folder under `data/output/`:
 
 ```
-data/output/<experiment_name>_<YYYY-MM-DD_HHMM>/
+data/output/<name>_<YYYY-MM-DD_HHMM>/
   results.jsonl          # one line per call (raw + parsed)
   results.csv            # legacy-compatible schema for the ML pipeline
   run_meta.json          # totals, timings, cost
   config_snapshot.yaml   # copy of the config used
 ```
 
-The CSV matches the existing tool's schema: metadata header rows, blank line, then
-`Response_Number, Text, [German_Text,] A1..A5, L1..L5, M1..M5, F1..F5`. UTF-8 BOM for Excel.
+Failed calls still appear in the CSV as `Text = "FAILED: <error>"` with all motive strengths zero.
 
-Failed calls still appear as rows with `Text = "FAILED: <error>"` and all motive strengths 0.
+---
 
-## Configuration
+## Commands at a glance
 
-Edit `config/example.yaml` or copy it. The motive list accepts three forms:
+| Command | Purpose |
+|---|---|
+| `python cli.py` | Interactive wizard (default when no args). |
+| `python cli.py generate CONFIG` | Full run: estimate → confirm → execute → export. |
+| `python cli.py estimate CONFIG` | Dry-run token + cost estimate. |
+| `python cli.py validate CONFIG` | Schema check, no network. |
+| `python cli.py list-motives` | Print the 4×5 motive matrix. |
+| `python cli.py report JSONL` | Convert an existing `results.jsonl` to CSV. |
+| `python cli.py wizard` | Explicit alias for the interactive flow. |
 
-```yaml
-# Explicit per-motive
-motives:
-  - id: A1
-    strength: 0.7
-  - id: L3
-    strength: 0.4
+Run `python cli.py <command> --help` for flags.
 
-# Shorthand mapping
-motives:
-  A1: 0.7
-  L3: 0.4
+---
 
-# Category expansion (all 5 cells)
-motives:
-  - category: A
-    strength: 0.5
-  - id: L3            # overrides / adds to the category batch
-    strength: 0.8
-```
+## Documentation
+
+| Page | For |
+|---|---|
+| [`docs/usage.md`](docs/usage.md) | Full walkthroughs of both usage paths; every subcommand in detail. |
+| [`docs/config-reference.md`](docs/config-reference.md) | Exhaustive YAML schema. |
+| [`docs/motives.md`](docs/motives.md) | The 20-motive catalog + strength scale. |
+| [`docs/output.md`](docs/output.md) | JSONL and CSV schemas (the contract with the ML pipeline). |
+| [`docs/prompt.md`](docs/prompt.md) | How the prompt is assembled and why it works. |
+| [`docs/cost.md`](docs/cost.md) | Estimation formula, pricing table, calibration. |
+| [`docs/troubleshooting.md`](docs/troubleshooting.md) | Common errors and fixes. |
+| [`docs/architecture.md`](docs/architecture.md) | Module map + data flow; for contributors. |
+
+---
 
 ## Interruption
 
-`Ctrl+C` stops dispatching new calls but lets in-flight calls finish, then flushes
-the JSONL and writes CSV for whatever completed. A second `Ctrl+C` hard-exits.
-
-Resume with:
+`Ctrl+C` drains in-flight calls, flushes JSONL, writes CSV for whatever completed. Resume with:
 
 ```bash
-python cli.py generate config/example.yaml --resume data/output/<prior_run>/results.jsonl
+python cli.py generate config/my_run.yaml --resume data/output/<prior_run>/results.jsonl
 ```
 
-## Commands
+---
 
-| Command | What |
-|---|---|
-| `generate CONFIG` | full run (estimate → confirm → execute → export) |
-| `estimate CONFIG` | dry-run token/cost estimate |
-| `validate CONFIG` | schema check, no network |
-| `list-motives`    | print the motive matrix |
-| `report JSONL`    | convert a `results.jsonl` to CSV after the fact |
+## Roadmap
+
+- **Phase 2:** additional OpenAI models (GPT-5 family), Anthropic, local Ollama. Persona mode with cached profiles.
+- **Phase 3:** motive-strength ranges + sampling, experiment orchestration.
+
+See [`CHANGELOG.md`](CHANGELOG.md).

@@ -23,6 +23,7 @@ from .models import (
     MotivePresent,
     RunSummary,
 )
+from .rate_limit import RateLimiter
 
 log = logging.getLogger(__name__)
 
@@ -102,6 +103,27 @@ def _load_completed_response_ids(path: Path) -> set[int]:
     return done
 
 
+_RL_WARN_THRESHOLD = 0.25  # warn if >25% of early calls hit rate limits
+_RL_WARN_WINDOW = 20        # ...within the first 20 calls
+
+
+def _classify_error(msg: str | None) -> str:
+    if not msg:
+        return "unknown"
+    m = msg.lower()
+    if "rate" in m or "429" in m or "tpm" in m or "rpm" in m or "rate_limit" in m:
+        return "rate_limited"
+    if "timeout" in m or "network" in m:
+        return "network"
+    if "invalid json" in m or "malformed response" in m or "'responses'" in m:
+        return "parse_error"
+    if "401" in m or "403" in m:
+        return "auth"
+    if "context" in m or "400" in m:
+        return "bad_request"
+    return "other"
+
+
 async def run(
     cfg: ExperimentConfig,
     matrix: MotiveMatrix,  # noqa: ARG001 (reserved for phase 2)
@@ -124,6 +146,17 @@ async def run(
     tracker = CostTracker(provider)
     sem = asyncio.Semaphore(cfg.concurrency)
     shutdown = asyncio.Event()
+
+    limiter = RateLimiter(
+        requests_per_minute=cfg.requests_per_minute,
+        tokens_per_minute=cfg.tokens_per_minute,
+    )
+    # Estimate per-call token cost for TPM reservations (input exact + max output).
+    input_tokens_est = provider.count_tokens(request.system, request.user)
+    per_call_reserve = input_tokens_est + request.max_tokens
+
+    failure_counts: dict[str, int] = {}
+    rl_seen_early = 0
 
     loop = asyncio.get_running_loop()
     prev_handler = signal.getsignal(signal.SIGINT)
@@ -152,6 +185,7 @@ async def run(
     pbar.set_postfix_str("$0.00")
 
     async def _run_one(client: httpx.AsyncClient, idx: int) -> None:
+        nonlocal rl_seen_early
         if shutdown.is_set():
             return
         response_id = idx + 1
@@ -163,6 +197,8 @@ async def run(
         async with sem:
             if shutdown.is_set():
                 return
+            if limiter.enabled:
+                await limiter.acquire(per_call_reserve)
             attempts_on_parse = 0
             raw = ""
             last_error: str | None = None
@@ -197,6 +233,19 @@ async def run(
 
             status = "ok" if last_error is None and text is not None else "failed"
             tracker.record(tokens_in, tokens_out)
+
+            if status == "failed":
+                cls = _classify_error(last_error)
+                failure_counts[cls] = failure_counts.get(cls, 0) + 1
+                if cls == "rate_limited" and idx < _RL_WARN_WINDOW:
+                    rl_seen_early += 1
+                    if rl_seen_early / max(1, idx + 1) > _RL_WARN_THRESHOLD and not limiter.enabled:
+                        pbar.write(
+                            "heads up: rate limits observed early. "
+                            "Consider setting `runtime.requests_per_minute` / "
+                            "`runtime.tokens_per_minute` in your config, "
+                            "or lowering `runtime.concurrency`."
+                        )
 
             result = GenerationResult(
                 call_index=idx,
@@ -244,6 +293,7 @@ async def run(
         elapsed_seconds=elapsed,
         output_dir=output_dir,
         results_jsonl=jsonl_path,
+        failure_breakdown=failure_counts,
     )
 
 

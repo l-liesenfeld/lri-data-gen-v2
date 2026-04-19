@@ -87,6 +87,8 @@ class ExperimentConfig:
     max_retries: int
     timeout_seconds: int
     motives: list[MotiveWeight]
+    requests_per_minute: int | None = None
+    tokens_per_minute: int | None = None
 
     @property
     def provider_prefix(self) -> str:
@@ -137,11 +139,19 @@ def load_config(path: Path, matrix: MotiveMatrix) -> ExperimentConfig:
     temperature = float(gen.get("temperature", 0.9))
     max_tokens = int(gen.get("max_tokens", 512))
 
-    concurrency = int(rt.get("concurrency", 5))
+    concurrency = int(rt.get("concurrency", 3))
     if concurrency < 1:
         raise ConfigError("runtime.concurrency must be >= 1")
-    max_retries = int(rt.get("max_retries", 5))
+    max_retries = int(rt.get("max_retries", 8))
     timeout_seconds = int(rt.get("timeout_seconds", 60))
+    rpm = rt.get("requests_per_minute")
+    tpm = rt.get("tokens_per_minute")
+    if rpm is not None:
+        if not isinstance(rpm, int) or rpm < 1:
+            raise ConfigError("runtime.requests_per_minute must be a positive integer")
+    if tpm is not None:
+        if not isinstance(tpm, int) or tpm < 1:
+            raise ConfigError("runtime.tokens_per_minute must be a positive integer")
 
     motives = _normalize_motives(motives_raw, matrix)
     if not motives:
@@ -162,6 +172,8 @@ def load_config(path: Path, matrix: MotiveMatrix) -> ExperimentConfig:
         max_retries=max_retries,
         timeout_seconds=timeout_seconds,
         motives=motives,
+        requests_per_minute=rpm,
+        tokens_per_minute=tpm,
     )
 
 
@@ -368,3 +380,4 @@ class RunSummary:
     output_dir: Path
     results_jsonl: Path
     results_csv: Path | None = field(default=None)
+    failure_breakdown: dict[str, int] = field(default_factory=dict)

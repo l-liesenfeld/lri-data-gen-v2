@@ -10,17 +10,23 @@ experiment:
 model: "openai:gpt-4o-2024-08-06"
 
 generation:
-  n_responses: 10           # total calls (one entry per call)
-  response_length: 3        # sentences per entry, 1..5
-  language: "english"       # english | deutsch | deutsch-english
-  context_hint: ""          # optional; e.g. "workplace situation"
+  n_responses: 10 # total calls (one entry per call)
+  response_length: 3 # sentences per entry, 1..5
+  language: "english" # english | deutsch | deutsch-english
+  context_hint: "" # optional; e.g. "workplace situation"
   # temperature: 0.9        # optional; default 0.9
   # max_tokens: 512         # optional; default 512
 
 runtime:
-  concurrency: 5            # parallel in-flight calls
-  # max_retries: 5
-  # timeout_seconds: 60
+  concurrency: 3 # parallel in-flight calls (default 3)
+  # max_retries: 8             # per-call retries on 429/5xx (default 8)
+  # timeout_seconds: 60        # per-call HTTP timeout (default 60)
+  #
+  # Optional proactive rate limiting. Set these to match your OpenAI tier so
+  # we pace below the ceiling instead of relying on 429-and-retry.
+  # Example for Tier 1 on gpt-4o:
+  # requests_per_minute: 500
+  # tokens_per_minute: 30000
 
 # Motive selection. Three forms, mix freely:
 #
