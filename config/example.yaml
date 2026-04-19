@@ -1,0 +1,46 @@
+# synth-data experiment config
+# Run with:  synth generate config/example.yaml
+
+experiment:
+  name: "example_run"
+  # output_dir: "data/output"      # optional; default data/output
+  # notes: "first run with 4o"     # optional; copied into run_meta.json
+
+# Phase 1: openai: prefix only. More providers coming later.
+model: "openai:gpt-4o-2024-08-06"
+
+generation:
+  n_responses: 10           # total calls (one entry per call)
+  response_length: 3        # sentences per entry, 1..5
+  language: "english"       # english | deutsch | deutsch-english
+  context_hint: ""          # optional; e.g. "workplace situation"
+  # temperature: 0.9        # optional; default 0.9
+  # max_tokens: 512         # optional; default 512
+
+runtime:
+  concurrency: 5            # parallel in-flight calls
+  # max_retries: 5
+  # timeout_seconds: 60
+
+# Motive selection. Three forms, mix freely:
+#
+#   - id: A1
+#     strength: 0.7
+#
+#   Shorthand mapping:
+#   A1: 0.7
+#   L3: 0.4
+#
+#   Category expansion (all 5 cells in category):
+#   - category: A
+#     strength: 0.5
+#
+# Strengths are 0.1..1.0. If an explicit id and a category expansion
+# assign the same motive, the explicit id wins (with a warning).
+motives:
+  - id: A1
+    strength: 0.7
+  - id: L3
+    strength: 0.4
+  - id: M2
+    strength: 0.5

@@ -1,0 +1,175 @@
+{
+  "motives": {
+    "A": {
+      "name": "Anschluss (Beziehung)",
+      "key_description": "Kontakt (meist dyadisch): Horizontal, ohne Zweck, absichtslos, erlebnisorientiert",
+      "cells": {
+        "1": {
+          "name": "Persönliche Begegnung",
+          "key": "A1",
+          "description": "(freudig-intuitiver Austausch: intimacy) persönlich werden, sich (auch in der Tiefe) verstehen, mit echtem Interesse füreinander austauschen; tief liebevolles Miteinander; echte persönliche Wärme und Nähe; aufrichtig lieben;",
+          "psi_reference": "Ebene 5 MOTIVE (intrinsiches Aufsuchen); intrinsic approach"
+        },
+        "2": {
+          "name": "Spaß mit anderen",
+          "key": "A2",
+          "description": "Extravertierter Kontakt, Unterhaltung, gute Stimmung, Erotik; Spass und Freude miteinander; Leichtigkeit in der Interaktion; geselliges Miteinander; auch oberflächlicher Spass;",
+          "psi_reference": "Ebene 6 ZIELE (extrinsiches Aufsuchen); extrinsic approach"
+        },
+        "3": {
+          "name": "Beziehung wiederherstellen",
+          "key": "A3",
+          "description": "Beziehungsschwierigkeiten (z.B. Zurückweisung) meistern, Verständnis für Leid und Schwäche; Beziehungen nach Konflikten wiederherstellen; Beziehungsschwierigkeiten kreativ mit Gefühl lösen; gesunden Perspektivwechsel zum überwinden von Beziehungsproblemen nutzen; ",
+          "psi_reference": "Ebene 7 SELBSTSTEUERUNG (wandeln; transformieren); self regulated coping"
+        },
+        "4": {
+          "name": "Harmonie suchen (Affiliation): Nähe",
+          "key": "A4",
+          "description": "Geborgenheit, Sicherheit finden, geliebt werden, Bindung an Stärkere, Beziehung kontrollieren; einseitig Harmonie suchen; eigene Unstimmitkeit in Gefühlen unterdrücken zugunsten von Harmonie; besonders vernünftig sein in Beziehungen auch gegen das eigene Gefühl;",
+          "psi_reference": "Ebene 6 ZIELE (aktives Vermeiden); active avoidance"
+        },
+        "5": {
+          "name": "Alleinsein",
+          "key": "A5",
+          "description": "Verlassen werden, nicht gemocht werden, einsam sein; ängstliche Beziehungsgestaltung; das Gefühl, allein zu sein; ",
+          "psi_reference": "Ebene 5 MOTIVE (passives Vermeiden); passive avoidance"
+        }
+      }
+    },
+    "L": {
+      "name": "Leistung (Fähigkeit)",
+      "key_description": "Gütemaßstab: etwas kann gelingen oder misslingen (besser oder schlechter), Schwieriges selbst meistern",
+      "cells": {
+        "1": {
+          "name": "Flow",
+          "key": "L1",
+          "description": "Aufgehen in einer herausfordernden Tätigkeit, Neugier und Interesse, Spaß an der Herausforderung, spielerisches Lernen; Leistungsflow; unerschöpfliche positive Leistungsenergie",
+          "psi_reference": "Ebene 5 MOTIVE (intrinsiches Aufsuchen); intrinsic approach"
+        },
+        "2": {
+          "name": "Etwas gut machen",
+          "key": "L2",
+          "description": "(individueller Gütemaßstab), Schwieriges schaffen, auf ein Ziel fokussiert sein; Zielorientierung; anspruchsvolle Qualitätsorientierung; Exzellenzstreben; Leistungen und Gütestandards übertreffen; Bestleistungen erzielen ist mit positiven Gefühlen verbunden; Gütemaßstäbe übertreffen;",
+          "psi_reference": "Ebene 6 ZIELE (extrinsiches Aufsuchen); extrinsic approach"
+        },
+        "3": {
+          "name": "Bewältigung von Misserfolg: Herausforderung",
+          "key": "L3",
+          "description": "positive Sicht von Schwierigkeiten, aus Fehlern lernen; Flexibilität, eigene mit Teamleistung integrieren; Herausforderungen suchen; Arbeiten nach dem Motto; 'geht nicht, gibt's nicht'; besonders kreativ in der Lösungsfindung bei schwierigen Aufgaben; ",
+          "psi_reference": "Ebene 7 SELBSTSTEUERUNG (wandeln; transformieren); self regulated coping"
+        },
+        "4": {
+          "name": "Leistungsdruck",
+          "key": "L4",
+          "description": "Soziale Bezugsnorm: besser sein als andere (ist mit innerem Druck verbunden), Wettkampf, Konkurrenz, ermüdende Anstrengung, nichts falsch machen; druckabhängige Leistungserbringung; Zeit- und Termindruck stimuliert Leistungsbereitschaft;",
+          "psi_reference": "Ebene 6 ZIELE (aktives Vermeiden); active avoidance"
+        },
+        "5": {
+          "name": "Misserfolgsfurcht",
+          "key": "L5",
+          "description": "Wegen eines Misserfolgs hilflos, ratlos, enttäuscht sein; ängstliche Leistungserbringung; Angst, Fehler zu machen; nach Hilfe suchen bei schwierigen Aufgaben; aufgeben bei schwierigen Aufgaben; Angst, dem eigenen Leistungsanspruch nicht genügen; ",
+          "psi_reference": "Ebene 5 MOTIVE (passives Vermeiden); passive avoidance"
+        }
+      }
+    },
+    "M": {
+      "name": "Macht (Durchsetzen)",
+      "key_description": "Einfluss auf andere ausüben; vertikaler Kontakt (stärker, schwächer), wirkungs- & zweckorientiert",
+      "cells": {
+        "1": {
+          "name": "prosoziale Führung",
+          "key": "M1",
+          "description": "(prosoziale Macht), Selbstausdruck, Rat geben, helfen, Wissen weitergeben, andere schützen, verstehen; positiv Einfluss auf andere ausüben; andere in ihrem Wachstum fördern; anleiten; positive Assoziation mit Verantwortung; Förderung von Sinnhaftigkeit (purpose)",
+          "psi_reference": "Ebene 5 MOTIVE (intrinsiches Aufsuchen); intrinsic approach"
+        },
+        "2": {
+          "name": "andere begeistern",
+          "key": "M2",
+          "description": "Objektbezogener Einfluss, Helfen, Pflegen aus der Situation heraus, andere begeistern, mitreißen; Feedback von anderen benötigt; Lob und Anerkennung brauchen (positive Gefühle durch Lob und Anerkennung); sich wohl auf der Bühne fühlen;",
+          "psi_reference": "Ebene 6 ZIELE (extrinsiches Aufsuchen); extrinsic approach"
+        },
+        "3": {
+          "name": "verantwortliche Führung",
+          "key": "M3",
+          "description": "Trotz Gegenwind: Einfluss nehmen, helfen, integrieren, entscheiden, Freiheit einräumen, Autonomie gewähren; verantwortungsvoll durch Krisen führen; kreative Bewältigung von Schwierigkeiten in der Durchsetzung und Gestaltung; Integration verschiedener Perspektiven bei der Durchsetzung; ",
+          "psi_reference": "Ebene 7 SELBSTSTEUERUNG (wandeln; transformieren); self regulated coping"
+        },
+        "4": {
+          "name": "Dominanz-inhibiert",
+          "key": "M4",
+          "description": "Befehlen, strenge Führung, konflikthafte Macht (erkennbar an Negationen), Recht von Macht durch Pflicht; Kampf; Verneinung von Macht und Durchsetzung; Hierarchiedenken; passiv-aggressive Durchsetzung und Behauptung; unterdrückte Gestaltungskraft; Dominanz; Einseitige Strenge;",
+          "psi_reference": "Ebene 6 ZIELE (aktives Vermeiden); active avoidance"
+        },
+        "5": {
+          "name": "Ohnmacht",
+          "key": "M5",
+          "description": "Keinen Einfluss haben, sich unterdrücken; sich schuldig fühlen, unterdrückt werden; Ohnmachtsgefühle; Hilflosigkeit; sich unterordnen; Schwierigkeiten und Durchsetzung passiv vermeiden; Ängstlichkeit in der Durchsetzung; ",
+          "psi_reference": "Ebene 5 MOTIVE (passives Vermeiden); passive avoidance"
+        }
+      }
+    },
+    "F": {
+      "name": "Freiheit (Selbstsein)",
+      "key_description": "Selbstwert, Absichtsloses Sein, Selbst-Integration, erlebnisorientiert",
+      "cells": {
+        "1": {
+          "name": "Selbstvertrauen",
+          "key": "F1",
+          "description": "Genießen, sich öffnen, offenbaren, Freude an neuer Erfahrung, für sich sein; Selbstvertrauen; explorieren; Freude beim ausprobieren; Freiheit geniessen; voller Freude und Offenheit für Neues; ",
+          "psi_reference": "Ebene 5 MOTIVE (intrinsiches Aufsuchen); intrinsic approach"
+        },
+        "2": {
+          "name": "Status",
+          "key": "F2",
+          "description": "(bedingtes Selbstvertrauen), Aufmerksamkeit, Anerkennung bekommen, im Mittelpunkt stehen; Status mögen; sich anerkannt fühlen wollen; ",
+          "psi_reference": "Ebene 6 ZIELE (extrinsiches Aufsuchen); extrinsic approach"
+        },
+        "3": {
+          "name": "Selbstwachstum (SR)",
+          "key": "F3",
+          "description": "Sicherheit wiedergewinnen, Selbst-Akzeptanz/ Integration von Unangenehmem, Mut zur Wahrheit, Wahllfreiheit, sich neue Erkenntnisse erarbeiten; persönlich wachsen;  herasufordernde persönliche Erfahrungen positiv verwandeln, transformieren; aus Niederschlägen positiv hervorgehen; ",
+          "psi_reference": "Ebene 7 SELBSTSTEUERUNG (wandeln; transformieren); self regulated coping"
+        },
+        "4": {
+          "name": "Selbstschutz (SK)",
+          "key": "F4",
+          "description": "Rigide Ich-Grenzen, sich rechtfertigen, Selbstbild durch Vergleich mit anderen, lästern, jemanden nicht mögen, so tun als ob; sich selbst über harte Grenzen schützen; andere nicht an sich heranlassen; Autonomie über Vernunft erzeugen; Autonomie eineitig hart und argumentativ erwirken;  ",
+          "psi_reference": "Ebene 6 ZIELE (aktives Vermeiden); active avoidance"
+        },
+        "5": {
+          "name": "Selbstentwertung",
+          "key": "F5",
+          "description": "Unsicherheit, Misstrauen, Scham, angeklagt werden, Angst vor Unbekanntem; Nicht gewürdigt werden; sich selbst nicht würdigen; die eigenen Emotionen entwerten; sich selbst entwerten; andere zu eigenen Lasten über sich stellen; eigene Freiräume und Bedürfnisse hinter die von anderen stellen.",
+          "psi_reference": "Ebene 5 MOTIVE (passives Vermeiden); passive avoidance"
+        }
+      }
+    }
+  },
+  "levels": {
+    "1": {
+      "name": "S+ Positive Stimmung (implizit) aus dem Selbst",
+      "key": "S+",
+      "description": "Gestaltungskraft, Kreativität, Selbstverständlichkeit"
+    },
+    "2": {
+      "name": "A+: positiver Anreiz",
+      "key": "A+",
+      "description": "Aufmerksamkeit ist nach Außen auf ein Objekt gerichtet"
+    },
+    "3": {
+      "name": "S(-): Selbständige Bewältigung",
+      "key": "S(-)",
+      "description": "(Selbstdistanzierung) Nennen von Schwierigkeiten, Angst vor einem negativen Ausgang, etc. und kreatives Problemlösen, Flexibilität, Weitblick"
+    },
+    "4": {
+      "name": "A(-): Aktives Vermeiden",
+      "key": "A(-)",
+      "description": "Angst vor der Frustration des Motivs wird meist nicht genannt, ist aber an Enge, Kontrollieren, Befolgen, Zielfixierung erkennbar."
+    },
+    "5": {
+      "name": "A-& A(+): Passive Vermeidung",
+      "key": "A-& A(+)",
+      "description": "Nennen eines negativen Ausgangs und negativer Gefühle ohne aktive Bewältigung."
+    }
+  }
+}

@@ -1,0 +1,47 @@
+
+# Synthetic Journal Entry Generation Task
+
+## OBJECTIVE
+Generate 1 authentic journal entry that subtly reflects specific psychological motives. This will be used to train a model for detecting hidden psychological patterns in writing.
+
+## BACKGROUND
+You are simulating a real psychotherapy client writing in a weekly journal. The response should represent an individual, with their own voice, concerns, and writing style.
+
+## PSYCHOLOGICAL MOTIVES TO EMBED
+The following motives should be subtly expressed in the writing. These should NOT be explicitly stated but should influence the underlying thought patterns, word choice, sentence structure, and emotional tone:
+
+{motives_block}
+
+## HOW TO EMBED MOTIVES
+- Higher strength values (closer to 1.0) mean the motive should be more detectable (though still not explicitly stated)
+- Lower strength values (closer to 0.0) mean the motive should be more deeply hidden and nuanced or even ambiguous
+- Embed motives through:
+  * Word choice (e.g., agency-focused vs. connection-focused language)
+  * Sentence structure (complex, simple, fragmented, flowing)
+  * Topics of concern (what the person focuses on)
+  * Emotional tone (anxious, confident, uncertain, frustrated)
+  * Attribution patterns (how they explain events and behaviors)
+  * Defense mechanisms (rationalization, projection, denial)
+
+## LANGUAGE INSTRUCTIONS
+{language_instructions}
+
+## DEMOGRAPHIC & SITUATIONAL CONTEXT
+{context_block}
+
+## RESPONSE FORMAT
+- Length: Approximately {response_length} sentences per entry
+- Structure: Natural journal entry format
+- Voice: First-person, authentic writing style
+- Output format: JSON structure exactly matching the following template:
+```
+{response_template_json}
+```
+
+## IMPORTANT GUIDELINES
+- Make the entry REALISTIC - avoid formulaic patterns
+- DO NOT explicitly name the motives in the text
+- Create authentic human-like cognitive patterns and logical inconsistencies
+- Include natural thought progressions, hesitations, and self-corrections
+- Write with authentic style, sophistication, and emotional awareness
+- The entry should read like a real journal entry, not a clinical case study
