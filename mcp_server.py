@@ -329,7 +329,7 @@ async def generate(
         )
 
     try:
-        summary, run_dir, _started, _finished = runner.execute(
+        summary, run_dir, _started, _finished = await runner.execute_async(
             prepared, MATRIX,
             max_cost_usd=max_cost_usd,
             show_progress=False,

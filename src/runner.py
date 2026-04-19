@@ -128,7 +128,7 @@ def _write_run_meta(
     )
 
 
-def execute(
+async def execute_async(
     prepared: PreparedRun,
     matrix: MotiveMatrix,
     *,
@@ -139,7 +139,8 @@ def execute(
     write_csv: bool = True,
     version: str = "0.1.0",
 ) -> tuple[RunSummary, Path, str, str]:
-    """Run the prepared pipeline end-to-end. Returns (summary, run_dir, started_at, finished_at).
+    """Async pipeline runner. Callers already inside an event loop (e.g. MCP
+    tools) should await this directly; sync callers (CLI) should use `execute()`.
 
     Writes results.jsonl (always), results.csv (unless write_csv=False), run_meta.json,
     and optionally config_snapshot.yaml into a fresh timestamped output directory.
@@ -152,16 +153,14 @@ def execute(
         shutil.copyfile(config_snapshot_path, run_dir / "config_snapshot.yaml")
 
     started_at = _utc_iso()
-    summary = asyncio.run(
-        pipeline.run(
-            prepared.cfg,
-            matrix,
-            prepared.provider,
-            prepared.request,
-            output_dir=run_dir,
-            resume_path=resume_path,
-            show_progress=show_progress,
-        )
+    summary = await pipeline.run(
+        prepared.cfg,
+        matrix,
+        prepared.provider,
+        prepared.request,
+        output_dir=run_dir,
+        resume_path=resume_path,
+        show_progress=show_progress,
     )
     finished_at = _utc_iso()
 
@@ -185,3 +184,13 @@ def execute(
         summary.results_csv = csv_path
 
     return summary, run_dir, started_at, finished_at
+
+
+def execute(
+    prepared: PreparedRun,
+    matrix: MotiveMatrix,
+    **kwargs,
+) -> tuple[RunSummary, Path, str, str]:
+    """Sync wrapper around `execute_async`. Only safe to call when NOT already
+    inside a running event loop."""
+    return asyncio.run(execute_async(prepared, matrix, **kwargs))
